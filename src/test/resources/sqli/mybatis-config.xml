@@ -29,14 +29,14 @@
             </transactionManager>
             <dataSource type="UNPOOLED">
                 <property name="driver" value="org.hsqldb.jdbcDriver" />
-                <property name="url" value="jdbc:hsqldb:mem:stringlistinvalid" />
+                <property name="url" value="jdbc:hsqldb:mem:sqli" />
                 <property name="username" value="sa" />
             </dataSource>
         </environment>
     </environments>
 
     <mappers>
-        <mapper resource="org/apache/ibatis/submitted/sqli/MapperInvalid.xml" />
+        <mapper resource="sqli/Mapper.xml" />
     </mappers>
 
 </configuration>

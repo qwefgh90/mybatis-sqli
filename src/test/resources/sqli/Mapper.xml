@@ -20,13 +20,13 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.apache.ibatis.submitted.sqli.Mapper">
+<mapper namespace="sqli.Mapper">
 
     <select id="getUsersAndGroups" resultMap="results">
         select * from users where id = #{id}
     </select>
 
-    <resultMap type="org.apache.ibatis.submitted.sqli.User" id="results">
+    <resultMap type="sqli.User" id="results">
         <id column="id" property="id"/>
         <collection property="groups" ofType="string">
             <result column="group_id"/>

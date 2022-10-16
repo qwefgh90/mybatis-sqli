@@ -47,6 +47,11 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
+  @Override
+  public boolean checkSQLInjection(String statement, Object parameter) {
+    return false;
+  }
+
   private final Configuration configuration;
   private final Executor executor;
 

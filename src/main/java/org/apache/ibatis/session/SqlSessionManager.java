@@ -33,6 +33,10 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  * @author Larry Meadors
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
+  @Override
+  public boolean checkSQLInjection(String statement, Object parameter) {
+    return sqlSessionProxy.checkSQLInjection(statement, parameter);
+  }
 
   private final SqlSessionFactory sqlSessionFactory;
   private final SqlSession sqlSessionProxy;
@@ -42,9 +46,9 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
-        SqlSessionFactory.class.getClassLoader(),
-        new Class[]{SqlSession.class},
-        new SqlSessionInterceptor());
+      SqlSessionFactory.class.getClassLoader(),
+      new Class[]{SqlSession.class},
+      new SqlSessionInterceptor());
   }
 
   public static SqlSessionManager newInstance(Reader reader) {
@@ -155,6 +159,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
   public Configuration getConfiguration() {
     return sqlSessionFactory.getConfiguration();
   }
+
 
   @Override
   public <T> T selectOne(String statement) {
@@ -339,7 +344,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private class SqlSessionInterceptor implements InvocationHandler {
     public SqlSessionInterceptor() {
-        // Prevent Synthetic Access
+      // Prevent Synthetic Access
     }
 
     @Override
