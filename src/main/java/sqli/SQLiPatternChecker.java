@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * @author qwefgh90
- * find attack
+ * Find attacks
  * <br>1. Visit all memebers in objects recursively and insert them into a String list
  * <br>2. Find malicious codes included in every string value with <a href="https://github.com/payloadbox/sql-injection-payload-list">SQL Injection Payload List</a>
  * <br>3. If malicious codes is found, return true. Otherwise, return false.
