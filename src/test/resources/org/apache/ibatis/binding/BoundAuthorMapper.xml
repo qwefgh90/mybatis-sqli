@@ -48,7 +48,7 @@
     </selectKey>
     insert into Author (id,username,password,email,bio,favourite_section)
     values(
-    #{id}, #{username}, #{password}, #{email}, #{bio}, #{favouriteSection:VARCHAR}
+    ${id}, #{username}, #{password}, #{email}, #{bio}, #{favouriteSection:VARCHAR}
     )
   </insert>
 

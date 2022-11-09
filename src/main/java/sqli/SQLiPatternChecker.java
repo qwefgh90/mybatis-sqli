@@ -28,6 +28,15 @@ public class SQLiPatternChecker {
     } catch(IOException e){
       throw new RuntimeException(e);
     }
+    try (BufferedReader reader = new BufferedReader(Resources.getResourceAsReader("sqli/Generic_UnionSelect.txt"))) {
+      String line = reader.readLine();
+      while(line != null){
+        patterns.add(line.toLowerCase()); // to lowercase
+        line = reader.readLine();
+      }
+    } catch(IOException e){
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -52,59 +61,66 @@ public class SQLiPatternChecker {
    * @param list
    */
   public static void collectAllStringMembers(Object target, List<String> list) {
-    collectAllStringMembers(target, list, null, new HashSet<>());
+    collectAllStringMembers(target, target.getClass(), list, new HashSet<>());
   }
 
   private static boolean containsAnyPattern(String parameter){
     for(String pattern : patterns){
-      if(parameter.toLowerCase().contains(pattern))
+      if(parameter.toLowerCase().startsWith(pattern) || parameter.toLowerCase().endsWith(pattern))
         return true;
     }
     return false;
   }
 
-  private static void collectAllStringMembers(Object target, List<String> list, Class targetTypeInContext, HashSet<Object> visitedObjects) {
-    if (target == null)
+  private static void collectAllStringMembers(Object target, Class targetType, List<String> candidates, HashSet<Object> visitedObjects) {
+    if (target == null || targetType == null)
       return;
-    targetTypeInContext = targetTypeInContext != null ? targetTypeInContext : target.getClass();
-    ObjectClass pair = new ObjectClass(target, targetTypeInContext);
-    if(visitedObjects.contains(pair))                                     // Skip if an object and a type have been already visited.
+    targetType = targetType != null ? targetType : target.getClass();
+    ObjectAndSubType pair = new ObjectAndSubType(target, targetType);
+    if(visitedObjects.contains(pair)        // Skip if an object and a type have been already visited.
+      || targetType.equals(Object.class))   // Skip if a type is Object class.
       return;
-    else                                                                  // Otherwise, put them into the set
+    else                                                             // Otherwise, put them into the set
       visitedObjects.add(pair);
 
-    if (String.class.equals(targetTypeInContext)) {                           // String.class - A String class
-      list.add((String) target);  //update a list
+    if (String.class.equals(targetType)) {                           // String.class - A String class
+      candidates.add((String) target);  //update a list
     }
-    else if (Iterable.class.isAssignableFrom(targetTypeInContext)) {          // Iterable.class - A class that inherits from Iterable
+    else if (Map.class.isAssignableFrom(targetType)) {          // Iterable.class - A class that inherits from Iterable
+      Map iterable = (Map) target;
+      for (Map.Entry element : (Set<Map.Entry>)iterable.entrySet()) {
+        collectAllStringMembers(element.getKey(), element.getKey().getClass(), candidates, visitedObjects); // A recursive call
+        collectAllStringMembers(element.getValue(), element.getValue().getClass(), candidates, visitedObjects); // A recursive call
+      }
+    }
+    else if (Iterable.class.isAssignableFrom(targetType)) {          // Iterable.class - A class that inherits from Iterable
       Iterable iterable = (Iterable) target;
       for (Object element : iterable) {
-        collectAllStringMembers(element, list, null, visitedObjects); // A recursive call
+        collectAllStringMembers(element, element.getClass(), candidates, visitedObjects); // A recursive call
       }
-    } else if (targetTypeInContext.isArray()) {                               // [L*.class - Array class
+    } else if (targetType.isArray()) {                               // [L*.class - Array class
       for (Object element : (Object[]) target) {
-        collectAllStringMembers(element, list, null, visitedObjects); // A recursive call
+        collectAllStringMembers(element, element.getClass(), candidates, visitedObjects); // A recursive call
       }
-    }else {                                                                   // *.class - Other classes
-      for (Field field : targetTypeInContext.getDeclaredFields()) {           // Visit all fields in this class
+    }else {                                                          // *.class - Other classes
+      if(classImplementsToString(targetType)){                        // If it implements toString()
         try {
-          field.setAccessible(true);
-          collectAllStringMembers(field.get(target), list, null, visitedObjects); // A recursive call
-        } catch (IllegalAccessException | InaccessibleObjectException e) {
-//          System.err.println(e);
-        }
-      }
-      if(!targetTypeInContext.equals(Object.class)
-        && classImplementsToString(targetTypeInContext)){ // If it implements toString()
-        try {
-          Method method = targetTypeInContext.getDeclaredMethod("toString");
-          list.add((String)method.invoke(target));   //update a list
+          Method method = targetType.getDeclaredMethod("toString");
+          candidates.add((String)method.invoke(target));   //update a list
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
           // An unreachable block
         }
       }
-      if (targetTypeInContext.getSuperclass() != null)  // Visit all fields in the super class
-        collectAllStringMembers(target, list, targetTypeInContext.getSuperclass(), visitedObjects); // A recursive call with a super class
+      for (Field field : targetType.getDeclaredFields()) {           // Visit all fields in this class
+        try {
+          field.setAccessible(true);
+          collectAllStringMembers(field.get(target), field.get(target).getClass(), candidates, visitedObjects); // A recursive call
+        } catch (IllegalAccessException | InaccessibleObjectException e) {
+//          System.err.println(e);
+        }
+      }
+      if (targetType.getSuperclass() != null)                         // Visit all fields in the super class
+        collectAllStringMembers(target, targetType.getSuperclass(), candidates, visitedObjects); // A recursive call with a super class
     }
   }
 
@@ -118,11 +134,11 @@ public class SQLiPatternChecker {
     }
   }
 
-  static class ObjectClass{
+  static class ObjectAndSubType {
     Object object;
     Class clazz;
 
-    public ObjectClass(Object object, Class clazz) {
+    public ObjectAndSubType(Object object, Class clazz) {
       this.object = object;
       this.clazz = clazz;
     }
@@ -131,7 +147,7 @@ public class SQLiPatternChecker {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
-      ObjectClass that = (ObjectClass) o;
+      ObjectAndSubType that = (ObjectAndSubType) o;
       return Objects.equals(object, that.object) && Objects.equals(clazz, that.clazz);
     }
 
@@ -140,5 +156,6 @@ public class SQLiPatternChecker {
       return Objects.hash(object, clazz);
     }
   }
+
 
 }
