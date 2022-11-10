@@ -15,12 +15,14 @@
  */
 package sqli;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 public interface Mapper {
 
-  List<User> getUsersAndGroups(Integer id);
+  List<User> getUsersAndGroups(@Param("id") Integer id, @Param("name") String name);
 
   List<Map<String, Object>> getUsersAndGroupsMap(Integer id);
 

@@ -148,7 +148,7 @@ class BindingTest {
         Author author = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
         when(() -> mapper.insertAuthorInvalidSelectKey(author));
         then(caughtException()).isInstanceOf(PersistenceException.class).hasMessageContaining(
-            "### The error may exist in org/apache/ibatis/binding/BoundAuthorMapper.xml" + System.lineSeparator() +
+            "### The error may exist in org/apache/ibatis/binding/VulnerableMapper.xml" + System.lineSeparator() +
                 "### The error may involve org.apache.ibatis.binding.BoundAuthorMapper.insertAuthorInvalidSelectKey!selectKey" + System.lineSeparator() +
                 "### The error occurred while executing a query");
       } finally {
@@ -165,7 +165,7 @@ class BindingTest {
         Author author = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
         when(() -> mapper.insertAuthorInvalidInsert(author));
         then(caughtException()).isInstanceOf(PersistenceException.class).hasMessageContaining(
-            "### The error may exist in org/apache/ibatis/binding/BoundAuthorMapper.xml" + System.lineSeparator() +
+            "### The error may exist in org/apache/ibatis/binding/VulnerableMapper.xml" + System.lineSeparator() +
                 "### The error may involve org.apache.ibatis.binding.BoundAuthorMapper.insertAuthorInvalidInsert" + System.lineSeparator() +
                 "### The error occurred while executing an update");
       } finally {

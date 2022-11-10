@@ -23,7 +23,7 @@
 <mapper namespace="sqli.Mapper">
 
     <select id="getUsersAndGroups" resultMap="results">
-        select * from users where id = #{id}
+        select * from users where id = #{id} and name = ${name}
     </select>
 
     <resultMap type="sqli.User" id="results">
