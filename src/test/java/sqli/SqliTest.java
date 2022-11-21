@@ -199,10 +199,13 @@ class SqliTest {
   }
 
   @Nested
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   @DisplayName("Four types of SQLIA")
   class FourTypesOfSQLIA {
+
     @Test
-    void errorBased1() throws IllegalAccessException {
+    @Order(1)
+    void classic1() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
       user.setId(1);
@@ -215,7 +218,8 @@ class SqliTest {
     }
 
     @Test
-    void errorBased2() throws IllegalAccessException {
+    @Order(2)
+    void classic2() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
       user.setId(1);
@@ -228,7 +232,8 @@ class SqliTest {
     }
 
     @Test
-    void errorBased3() throws IllegalAccessException {
+    @Order(3)
+    void classic3() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
       user.setId(1);
@@ -241,20 +246,7 @@ class SqliTest {
     }
 
     @Test
-    void errorBased4() throws IllegalAccessException {
-      List<String> list = new ArrayList<>();
-      User user = new User();
-      user.setId(1);
-      user.setName("10 ORDER BY 10");
-
-      user.setGroups(List.of("grp1"));
-      user.setRoles(List.of("role1"));
-      String matchedPattern = SQLiPatternChecker.containsSQLInjectionPattern(user);
-      Assertions.assertNotNull(matchedPattern);
-      print(String.format("✔ Type1-4 Attack's found. A pattern is [ %s ] matched.", matchedPattern));
-    }
-
-    @Test
+    @Order(4)
     void unionBased1() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
@@ -269,6 +261,7 @@ class SqliTest {
     }
 
     @Test
+    @Order(5)
     void unionBased2() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
@@ -283,6 +276,22 @@ class SqliTest {
     }
 
     @Test
+    @Order(6)
+    void unionBased3() throws IllegalAccessException {
+      List<String> list = new ArrayList<>();
+      User user = new User();
+      user.setId(1);
+      user.setName("10 ORDER BY 10");
+
+      user.setGroups(List.of("grp1"));
+      user.setRoles(List.of("role1"));
+      String matchedPattern = SQLiPatternChecker.containsSQLInjectionPattern(user);
+      Assertions.assertNotNull(matchedPattern);
+      print(String.format("✔ Type2-3 Attack's found. A pattern is [ %s ] matched.", matchedPattern));
+    }
+
+    @Test
+    @Order(7)
     void blind1() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
@@ -297,6 +306,7 @@ class SqliTest {
     }
 
     @Test
+    @Order(8)
     void blind2() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
@@ -311,6 +321,7 @@ class SqliTest {
     }
 
     @Test
+    @Order(9)
     void timeBased1() throws IllegalAccessException {
       List<String> list = new ArrayList<>();
       User user = new User();
